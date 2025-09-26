@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Igreja Quadrangular Jardim Bela Vista</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: #f8fafc;
+    }
+
+    header {
+      background: linear-gradient(to right, #c21515, #1624c4, #f5c402, #c418a5);
+      color: white;
+      padding: 15px;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .titulo {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .logo {
+      max-width: 100px;
+      height: auto;
+    }
+
+    .container {
+      margin: 20px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      min-width: 120px;
+      color: #f1f5f9;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 8px;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 95vw;
+    }
+
+    .seat {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: #374151;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      color: #9ca3af;
+    }
+
+    .seat.selected {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: #e2e8f0;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    @media (max-width: 1024px) {
+      .logo {
+        max-width: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 10px;
+      }
+
+      .titulo {
+        font-size: 16px;
+      }
+
+      .logo {
+        max-width: 60px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+      }
+
+      .seat {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+      }
+
+      .summary {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <header>
+    <div class="header-content">
+      <span class="titulo">Igreja Quadrangular Jardim Bela Vista</span>
+      <!-- Link direto de imagem substituído -->
+      <img src="https://i.postimg.cc/5tTQjR4F/logo-igreja.png" alt="Logo Igreja Quadrangular" class="logo">
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="summary">
+      <div class="card">Primeiro Culto<br><span id="culto1Count">0</span></div>
+      <div class="card">Segundo Culto<br><span id="culto2Count">0</span></div>
+      <div class="card">Total Geral<br><span id="totalCount">0</span></div>
+    </div>
+
+    <h2>Primeiro Culto</h2>
+    <div id="culto1" class="grid"></div>
+
+    <h2>Segundo Culto</h2>
+    <div id="culto2" class="grid"></div>
+
+    <button onclick="exportarPDF()">📄 Baixar PDF</button>
+    <button onclick="exportarExcel()">📊 Baixar Excel</button>
+  </div>
+
+  <script>
+    const totalPoltronas = 25 * 6;
+    const culto1 = document.getElementById("culto1");
+    const culto2 = document.getElementById("culto2");
+
+    function criarPoltronas(container) {
+      for (let i = 0; i < totalPoltronas; i++) {
+        const seat = document.createElement("div");
+        seat.classList.add("seat");
+        seat.innerHTML = "💺";
+        seat.onclick = () => {
+          seat.classList.toggle("selected");
+          atualizarContagem();
+        };
+        container.appendChild(seat);
+      }
+    }
+
+    criarPoltronas(culto1);
+    criarPoltronas(culto2);
+
+    function atualizarContagem() {
+      const culto1Count = culto1.querySelectorAll(".seat.selected").length;
+      const culto2Count = culto2.querySelectorAll(".seat.selected").length;
+      document.getElementById("culto1Count").textContent = culto1Count;
+      document.getElementById("culto2Count").textContent = culto2Count;
+      document.getElementById("totalCount").textContent = culto1Count + culto2Count;
+    }
+
+    function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Relatório de Presença - Igreja Quadrangular Jardim Bela Vista", 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Primeiro Culto: ${document.getElementById("culto1Count").textContent} pessoas`, 20, 40);
+      doc.text(`Segundo Culto: ${document.getElementById("culto2Count").textContent} pessoas`, 20, 50);
+      doc.text(`Total Geral: ${document.getElementById("totalCount").textContent} pessoas`, 20, 60);
+      doc.setDrawColor(0, 128, 0);
+      doc.setLineWidth(2);
+      doc.line(20, 70, 190, 70);
+      doc.save("Relatorio_Presenca.pdf");
+    }
+
+    function exportarExcel() {
+      const dados = [
+        ["Culto", "Quantidade de Pessoas"],
+        ["Primeiro Culto", document.getElementById("culto1Count").textContent],
+        ["Segundo Culto", document.getElementById("culto2Count").textContent],
+        ["Total Geral", document.getElementById("totalCount").textContent]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(dados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+      XLSX.writeFile(wb, "Relatorio_Presenca.xlsx");
+    }
+  </script>
+</body>
+</html>
